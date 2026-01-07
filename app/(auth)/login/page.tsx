@@ -9,6 +9,10 @@ import logo from "../../../public/logo.svg";
 import Link from "next/link";
 import { useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
+import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/redux/freatures/authAPI";
+import { saveTokens } from "@/services/authService";
+import { toast } from "react-toastify";
 
 type TLoginData = {
   email: string;
@@ -17,9 +21,37 @@ type TLoginData = {
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const router = useRouter();
+  const [login, { isLoading }] = useLoginMutation();
 
-  const onsubmit = (data: TLoginData) => {
-    console.log(data);
+  const onsubmit = async (data: TLoginData) => {
+    try {
+      const response = await login({
+        email: data.email,
+        password: data.password,
+      }).unwrap();
+
+      if (response.success) {
+        // Save the access token to both cookies and localStorage
+        await saveTokens(response.access);
+        localStorage.setItem("accessToken", response.access);
+
+        // Show success toast
+        toast.success(response.message || "Login successful!");
+
+        console.log("Login successful:", response);
+
+        // Small delay to ensure token is saved before redirect
+        setTimeout(() => {
+          router.push("/");
+        }, 100);
+      }
+    } catch (error: any) {
+      // Handle error response
+      const errorMessage =
+        error?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMessage);
+    }
   };
   return (
     <div className="flex justify-center items-center">
@@ -71,9 +103,10 @@ const Login = () => {
               </Link>
               <button
                 type="submit"
-                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl cursor-pointer"
+                disabled={isLoading}
+                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Login
+                {isLoading ? "Logging in..." : "Login"}
               </button>
             </FormHandler>
           </div>
