@@ -8,6 +8,7 @@ import {
   useRejectUserMutation,
 } from "@/redux/freatures/verificationCenterAPI";
 import { toast } from "react-toastify";
+import { getFullImageFullUrl } from "@/lib/utils";
 
 interface VerificationInfoModalProps {
   user: IVerificationCenter | null;
@@ -26,6 +27,17 @@ const VerificationInfoModal = ({
   if (!user) return null;
 
   const isButtonsDisabled = user.is_admin_aproved || user.is_admin_rejected;
+
+  const handleDownload = (url: string, fileName: string) => {
+    const fullUrl = getFullImageFullUrl(url);
+    const link = document.createElement("a");
+    link.href = fullUrl;
+    link.download = fileName;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleApprove = async () => {
     try {
@@ -69,13 +81,23 @@ const VerificationInfoModal = ({
         </button>
         <div className="flex justify-center items-center flex-col w-full gap-5 mb-5">
           <h3 className="font-medium text-[30px]">Details</h3>
-          <Image
-            src={user.image ? user.image : logo}
-            alt="user logo"
-            width={80}
-            height={80}
-            className="rounded-full"
-          />
+          {user.image ? (
+            <img
+              src={getFullImageFullUrl(user.image)}
+              alt="user logo"
+              width={80}
+              height={80}
+              className="rounded-full object-cover w-20 h-20"
+            />
+          ) : (
+            <Image
+              src={logo}
+              alt="user logo"
+              width={80}
+              height={80}
+              className="rounded-full object-cover"
+            />
+          )}
         </div>
         <div>
           <div className="flex justify-between items-center py-2">
@@ -144,22 +166,87 @@ const VerificationInfoModal = ({
             All Documents
           </h2>
           {user.licences.length > 0 && (
-            <div className="flex justify-between items-center py-2">
-              <h3 className="font-normal text-lg text-heading">Licences:</h3>
-              <p className="text-paragraph text-lg font-normal">
-                {user.licences.length} licence(s)
-              </p>
-            </div>
+            <>
+              <h3 className="font-medium text-lg text-heading mt-3 mb-2">
+                Licences ({user.licences.length})
+              </h3>
+              {user.licences.map((licence: any, index: number) => (
+                <div key={index} className="mb-2">
+                  {licence.licence_images &&
+                    licence.licence_images.length > 0 && (
+                      <div className="flex flex-col gap-1">
+                        {licence.licence_images.map(
+                          (imageId: number, imgIndex: number) => (
+                            <button
+                              key={imgIndex}
+                              onClick={() =>
+                                handleDownload(
+                                  `/media/licence_images/${imageId}`,
+                                  `licence_${
+                                    licence.licence_no || index
+                                  }_${imgIndex}.jpg`
+                                )
+                              }
+                              className="text-blue-500 hover:underline text-left text-sm"
+                            >
+                              📄 Licence {licence.licence_no || index + 1} -
+                              Image {imgIndex + 1}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    )}
+                  {licence.state_or_territory && (
+                    <p className="text-xs text-gray-600 ml-4">
+                      State: {licence.state_or_territory}
+                    </p>
+                  )}
+                  {licence.expire_date && (
+                    <p className="text-xs text-gray-600 ml-4">
+                      Expires:{" "}
+                      {new Date(licence.expire_date).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </>
           )}
           {user.accreditations.length > 0 && (
-            <div className="flex justify-between items-center py-2">
-              <h3 className="font-normal text-lg text-heading">
-                Accreditations:
+            <>
+              <h3 className="font-medium text-lg text-heading mt-3 mb-2">
+                Accreditations ({user.accreditations.length})
               </h3>
-              <p className="text-paragraph text-lg font-normal">
-                {user.accreditations.length} accreditation(s)
-              </p>
-            </div>
+              {user.accreditations.map((accreditation: any, index: number) => {
+                const fileName =
+                  accreditation.accreditation?.split("/").pop() ||
+                  `accreditation_${index + 1}`;
+                const fileExtension = fileName.split(".").pop() || "file";
+                return (
+                  <div key={index} className="mb-2">
+                    <button
+                      onClick={() =>
+                        handleDownload(accreditation.accreditation, fileName)
+                      }
+                      className="text-blue-500 hover:underline text-left text-sm flex items-center gap-2"
+                    >
+                      <span>{fileExtension === "pdf" ? "📕" : "📄"}</span>
+                      {fileName}
+                    </button>
+                    {accreditation.expire_date && (
+                      <p className="text-xs text-gray-600 ml-6">
+                        Expires:{" "}
+                        {new Date(
+                          accreditation.expire_date
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
+          {user.licences.length === 0 && user.accreditations.length === 0 && (
+            <p className="text-gray-500 text-sm py-2">No documents uploaded</p>
           )}
         </div>
         <div className="modal-action">
