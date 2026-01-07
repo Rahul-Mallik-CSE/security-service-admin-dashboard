@@ -27,7 +27,7 @@ interface CustomTableProps<T> {
   renderCell?: (item: T, columnKey: string) => React.ReactNode;
 }
 
-export default function CustomTable<T extends { id: string }>({
+export default function CustomTable<T extends { id: string | number }>({
   columns,
   data,
   itemsPerPage = 10,
