@@ -173,3 +173,14 @@ export interface PayrollAPIResponse {
   previous: string | null;
   results: any[];
 }
+
+export interface IOperativeManagementData {
+  candidate: IVerificationCenter;
+  avg_rating_main: string;
+}
+
+export interface IOperativeManagementAPIResponse {
+  success: boolean;
+  message: string;
+  data: IOperativeManagementData[];
+}
