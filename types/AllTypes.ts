@@ -26,12 +26,41 @@ export interface IEarningList {
 }
 
 export interface IVerificationCenter {
-  id: string;
-  userName: string;
-  userRole: string;
-  submittedDocs: string;
-  uploadDate: string;
-  status: "reject" | "approved" | "pending";
+  id: number;
+  email: string;
+  status: boolean;
+  phone: string | null;
+  is_email_varified: boolean;
+  is_phone_verified: boolean;
+  image: string | null;
+  last_activity: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  user_type: string;
+  licences: any[];
+  accreditations: any[];
+  gender: string;
+  language: string | null;
+  exprience_in_years: number;
+  exprience_summary: string;
+  user_redus: number;
+  bank_name: string | null;
+  account_holder_name: string | null;
+  account_no: string | null;
+  bank_branch: string | null;
+  is_applied: boolean;
+  is_admin_aproved: boolean;
+  is_admin_rejected: boolean;
+  is_subscribe: boolean;
+  create_at: string;
+  updated_at: string;
+}
+
+export interface IVerificationAPIResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: IVerificationCenter[];
 }
 
 export interface IOperativeManagement {
