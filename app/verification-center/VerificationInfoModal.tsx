@@ -63,6 +63,8 @@ const VerificationInfoModal = ({
     }
   };
 
+  const hasImage = !!user.image;
+  const imageSrc = hasImage ? getFullImageFullUrl(user.image) : logo;
   return (
     <dialog
       id="my_modal_3"
@@ -81,23 +83,14 @@ const VerificationInfoModal = ({
         </button>
         <div className="flex justify-center items-center flex-col w-full gap-5 mb-5">
           <h3 className="font-medium text-[30px]">Details</h3>
-          {user.image ? (
-            <img
-              src={getFullImageFullUrl(user.image)}
-              alt="user logo"
-              width={80}
-              height={80}
-              className="rounded-full object-cover w-20 h-20"
-            />
-          ) : (
-            <Image
-              src={logo}
-              alt="user logo"
-              width={80}
-              height={80}
-              className="rounded-full object-cover"
-            />
-          )}
+          <Image
+            src={imageSrc}
+            alt="user logo"
+            width={80}
+            height={80}
+            className="rounded-full object-cover w-20 h-20"
+            unoptimized={hasImage}
+          />
         </div>
         <div>
           <div className="flex justify-between items-center py-2">
@@ -171,31 +164,15 @@ const VerificationInfoModal = ({
                 Licences ({user.licences.length})
               </h3>
               {user.licences.map((licence: any, index: number) => (
-                <div key={index} className="mb-2">
-                  {licence.licence_images &&
-                    licence.licence_images.length > 0 && (
-                      <div className="flex flex-col gap-1">
-                        {licence.licence_images.map(
-                          (imageId: number, imgIndex: number) => (
-                            <button
-                              key={imgIndex}
-                              onClick={() =>
-                                handleDownload(
-                                  `/media/licence_images/${imageId}`,
-                                  `licence_${
-                                    licence.licence_no || index
-                                  }_${imgIndex}.jpg`
-                                )
-                              }
-                              className="text-blue-500 hover:underline text-left text-sm"
-                            >
-                              📄 Licence {licence.licence_no || index + 1} -
-                              Image {imgIndex + 1}
-                            </button>
-                          )
-                        )}
-                      </div>
-                    )}
+                <div key={index} className="mb-3 border-b pb-2">
+                  <p className="font-medium text-sm text-heading mb-1">
+                    {licence.licence_type?.title || `Licence ${index + 1}`}
+                  </p>
+                  {licence.licence_no && (
+                    <p className="text-xs text-gray-600 ml-4">
+                      Licence No: {licence.licence_no}
+                    </p>
+                  )}
                   {licence.state_or_territory && (
                     <p className="text-xs text-gray-600 ml-4">
                       State: {licence.state_or_territory}
@@ -207,6 +184,32 @@ const VerificationInfoModal = ({
                       {new Date(licence.expire_date).toLocaleDateString()}
                     </p>
                   )}
+                  {licence.licence_images &&
+                    licence.licence_images.length > 0 && (
+                      <div className="flex flex-col gap-1 mt-2">
+                        {licence.licence_images.map(
+                          (image: any, imgIndex: number) => {
+                            const fileName =
+                              image.file?.split("/").pop() ||
+                              `licence_${licence.licence_no || index + 1}_${
+                                imgIndex + 1
+                              }`;
+                            return (
+                              <button
+                                key={imgIndex}
+                                onClick={() =>
+                                  handleDownload(image.file, fileName)
+                                }
+                                className="text-blue-500 hover:underline text-left text-sm flex items-center gap-2 ml-4"
+                              >
+                                <span>📄</span>
+                                {fileName}
+                              </button>
+                            );
+                          }
+                        )}
+                      </div>
+                    )}
                 </div>
               ))}
             </>
