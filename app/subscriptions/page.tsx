@@ -105,6 +105,24 @@ const Subscriptions = () => {
 
   const subscriptions = subscriptionsData?.results || [];
 
+  // Filter subscriptions based on search text
+  const filteredSubscriptions = subscriptions.filter((subscription) => {
+    if (!searchText) return true;
+
+    const searchLower = searchText.toLowerCase();
+    return (
+      subscription.id.toString().includes(searchLower) ||
+      subscription.user.first_name.toLowerCase().includes(searchLower) ||
+      subscription.user.email.toLowerCase().includes(searchLower) ||
+      subscription.user.user_type.toLowerCase().includes(searchLower) ||
+      subscription.price.toLowerCase().includes(searchLower) ||
+      new Date(subscription.invoice_date)
+        .toLocaleDateString()
+        .toLowerCase()
+        .includes(searchLower)
+    );
+  });
+
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
@@ -117,11 +135,15 @@ const Subscriptions = () => {
             onChange={(e) => setSeachText(e.currentTarget.value)}
             className="bg-gray-50 py-2 pl-10 pr-4 appearance-none outline-none border border-gray-300 rounded-xl w-[282px]"
           />
+          <CiSearch
+            className="absolute left-3 top-3 text-paragraph"
+            size={20}
+          />
         </form>
       </div>
       <CustomTable
         columns={columns}
-        data={subscriptions}
+        data={filteredSubscriptions}
         renderCell={renderCell}
         itemsPerPage={15}
       />
