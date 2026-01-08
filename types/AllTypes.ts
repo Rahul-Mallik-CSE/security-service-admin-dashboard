@@ -102,6 +102,7 @@ export interface IJobs {
   payRate: number;
   dateTime: string;
   status: "pending" | "send";
+  created_at?: string;
 }
 
 export interface IContractList {
