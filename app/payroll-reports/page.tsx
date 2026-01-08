@@ -61,10 +61,6 @@ const PayrollReports = () => {
               size={20}
             />
           </form>
-          <button className="text-title bg-orange-200 rounded-xl py-1.5 px-4 font-medium flex items-center gap-2 text-[20px] cursor-pointer">
-            <span className="text-">Filter</span>
-            <SlidersHorizontal />
-          </button>
         </div>
       </div>
       <CustomTable
