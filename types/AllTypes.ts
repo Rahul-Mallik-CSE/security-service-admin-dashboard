@@ -14,6 +14,12 @@ export interface IRecentUserData {
   joinDate: string;
 }
 
+export interface IDashboardStats {
+  total_earnings: number;
+  total_companies: number;
+  total_guards: number;
+}
+
 export interface IEarningList {
   id: string;
   trId: string;
