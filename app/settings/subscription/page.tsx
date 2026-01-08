@@ -1,6 +1,6 @@
 /** @format */
 
-import SubscriptionCard from "@/app/components/dashboard/SubscriptionCard";
+import SubscriptionCard from "@/components/DashboardComponents/SubscriptionCard";
 import BackButton from "@/components/SharedComponents/BackButton";
 import { subscriptionPlans } from "@/data/Subscription";
 import { ISubscriptionPlan } from "@/types/AllTypes";

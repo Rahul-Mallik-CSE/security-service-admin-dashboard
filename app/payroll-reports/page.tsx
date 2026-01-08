@@ -1,17 +1,20 @@
 /** @format */
 
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { IPayrollReports, TableColumn } from "../../types/AllTypes";
-import { CiCircleInfo, CiSearch } from "react-icons/ci";
-import { Button } from "@/components/ui/button";
-import { AiOutlineDelete } from "react-icons/ai";
-import { SlidersHorizontal } from "lucide-react";
+import { CiSearch } from "react-icons/ci";
 import CustomTable from "../../components/SharedComponents/CustomTable";
-import { payrollReportsData } from "../../data/PayrollReports";
+import {
+  useGetPayrollReportsQuery,
+  IPayrollData,
+} from "@/redux/freatures/payrollReportsAPI";
 
 const PayrollReports = () => {
-  const [searchText, setSeachText] = useState<string>("");
+  const [searchText, setSearchText] = useState<string>("");
+
+  const { data, isLoading, error } = useGetPayrollReportsQuery();
+
   const columns: TableColumn[] = [
     { key: "companyName", label: "Company Name", width: "100px" },
     { key: "totalJobs", label: "Total Jobs", width: "100px" },
@@ -20,10 +23,38 @@ const PayrollReports = () => {
     { key: "totalPay", label: "Total Pay ($)", width: "100px" },
     { key: "status", label: "Status", width: "100px" },
   ];
+
+  // Transform API data to table format with search
+  const tableData: IPayrollReports[] = useMemo(() => {
+    if (!data?.data) return [];
+
+    return data.data
+      .map((payroll: IPayrollData, index: number) => ({
+        id: index.toString(),
+        companyName: payroll.company_name || "N/A",
+        totalJobs: payroll.total_jobs,
+        totalOperatives: payroll.total_operatives,
+        totalHours: payroll.total_hours,
+        totalPay: payroll.total_pay,
+        status: (payroll.status === "is_signed" ? "send" : "pending") as
+          | "pending"
+          | "send",
+      }))
+      .filter((payroll) => {
+        if (!searchText) return true;
+        const searchLower = searchText.toLowerCase();
+        return (
+          payroll.companyName.toLowerCase().includes(searchLower) ||
+          payroll.totalJobs.toString().includes(searchLower) ||
+          payroll.totalOperatives.toString().includes(searchLower)
+        );
+      });
+  }, [data, searchText]);
+
   const renderCell = (item: IPayrollReports, columnKey: string) => {
     switch (columnKey) {
       case "totalPay":
-        return <div>${item.totalPay}</div>;
+        return <div>${item.totalPay.toFixed(2)}</div>;
       case "status":
         return (
           <div
@@ -41,19 +72,27 @@ const PayrollReports = () => {
         return String(item[columnKey as keyof IPayrollReports]);
     }
   };
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-10">
+        Error loading payroll reports data. Please try again.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-2xl font-medium text-heading">
-          Operative Management
-        </h2>
+        <h2 className="text-2xl font-medium text-heading">Payroll Reports</h2>
         <div className="flex justify-between items-center gap-5">
           <form className="relative ">
             <input
               type="search"
               placeholder="Search"
               name="search"
-              onChange={(e) => setSeachText(e.currentTarget.value)}
+              value={searchText}
+              onChange={(e) => setSearchText(e.currentTarget.value)}
               className="bg-gray-50 py-2 pl-10 pr-4 appearance-none outline-none border border-gray-300 rounded-xl w-[282px]"
             />
             <CiSearch
@@ -63,11 +102,15 @@ const PayrollReports = () => {
           </form>
         </div>
       </div>
-      <CustomTable
-        columns={columns}
-        data={payrollReportsData}
-        renderCell={renderCell}
-      ></CustomTable>
+      {isLoading ? (
+        <div className="text-center py-10">Loading...</div>
+      ) : (
+        <CustomTable
+          columns={columns}
+          data={tableData}
+          renderCell={renderCell}
+        />
+      )}
     </div>
   );
 };
