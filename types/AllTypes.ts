@@ -89,6 +89,10 @@ export interface ICompanyManagement {
   status: "active" | "suspanded";
 }
 
+export interface ICompanyManagementTableData extends ICompanyManagement {
+  subscriptionDate?: string;
+}
+
 export interface IJobs {
   id: string;
   jobId: string;

@@ -1,19 +1,26 @@
 /** @format */
 
 "use client";
-import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
-import { AiOutlineDelete } from "react-icons/ai";
+import React, { useState, useMemo } from "react";
 import { CiCircleInfo, CiSearch } from "react-icons/ci";
 import { FaStar } from "react-icons/fa";
 import { ICompanyManagement, TableColumn } from "../../types/AllTypes";
-import { SlidersHorizontal } from "lucide-react";
 import CustomTable from "../../components/SharedComponents/CustomTable";
-import { CompanyManagementData } from "../../data/CompanyManagement";
 import CompanyManagementInfoModal from "./CompanyManagementInfoModal";
+import {
+  useGetCompanyManagementQuery,
+  ICompanyData,
+} from "@/redux/freatures/companyManageAPI";
 
 const CompanyManage = () => {
   const [searchText, setSeachText] = useState<string>("");
+  const [selectedCompany, setSelectedCompany] = useState<ICompanyData | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { data, isLoading, error } = useGetCompanyManagementQuery();
+
   const columns: TableColumn[] = [
     { key: "trId", label: "#TR.ID", width: "100px" },
     { key: "companyName", label: "Company Name", width: "100px" },
@@ -23,13 +30,48 @@ const CompanyManage = () => {
     { key: "status", label: "Status", width: "100px" },
     { key: "action", label: "Action", width: "100px" },
   ];
+
+  // Transform API data to table format
+  const tableData: ICompanyManagement[] = useMemo(() => {
+    if (!data?.companies) return [];
+
+    return data.companies
+      .map((companyData) => {
+        const latestInvoice =
+          companyData.invoices.length > 0 ? companyData.invoices[0] : null;
+        const subscriptionPlanName = latestInvoice
+          ? `Plan ${latestInvoice.plan}`
+          : "No Subscription";
+
+        return {
+          id: companyData.company.id.toString(),
+          trId: `#${companyData.company.id}`,
+          companyName:
+            companyData.company_name || companyData.company.email.split("@")[0],
+          email: companyData.company.email,
+          subscription: subscriptionPlanName,
+          rating: parseFloat(companyData.average_rating_main),
+          status: companyData.company.is_subscribe ? "active" : "suspanded",
+        } as ICompanyManagement;
+      })
+      .filter((company) => {
+        if (!searchText) return true;
+        const searchLower = searchText.toLowerCase();
+        return (
+          company.companyName.toLowerCase().includes(searchLower) ||
+          company.email.toLowerCase().includes(searchLower) ||
+          company.trId.toLowerCase().includes(searchLower)
+        );
+      });
+  }, [data, searchText]);
+
   const renderCell = (item: ICompanyManagement, columnKey: string) => {
     switch (columnKey) {
       case "rating":
         return (
           <div className="flex gap-2">
             <FaStar className="text-amber-300" size={18} />
-            {item.rating}
+            {item.rating.toFixed(2)}
           </div>
         );
       case "status":
@@ -48,25 +90,34 @@ const CompanyManage = () => {
         return (
           <div className="flex items-center">
             <button
-              onClick={() =>
-                (
-                  document.getElementById("my_modal_5") as HTMLDialogElement
-                ).showModal()
-              }
+              onClick={() => {
+                const company = data?.companies.find(
+                  (c) => c.company.id.toString() === item.id
+                );
+                if (company) {
+                  setSelectedCompany(company);
+                  setIsModalOpen(true);
+                }
+              }}
               className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
             >
               <CiCircleInfo className="size-6 text-gray-600" />
             </button>
-            <Button className="p-0.5 bg-transparent hover:bg-gray-100 rounded-md transition-colors">
-              <AiOutlineDelete className="size-6 text-gray-600" />
-            </Button>
-            <CompanyManagementInfoModal></CompanyManagementInfoModal>
           </div>
         );
       default:
         return String(item[columnKey as keyof ICompanyManagement]);
     }
   };
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-10">
+        Error loading company management data. Please try again.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-3">
@@ -87,11 +138,20 @@ const CompanyManage = () => {
           />
         </form>
       </div>
-      <CustomTable
-        columns={columns}
-        data={CompanyManagementData}
-        renderCell={renderCell}
-      ></CustomTable>
+      {isLoading ? (
+        <div className="text-center py-10">Loading...</div>
+      ) : (
+        <CustomTable
+          columns={columns}
+          data={tableData}
+          renderCell={renderCell}
+        />
+      )}
+      <CompanyManagementInfoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        company={selectedCompany}
+      />
     </div>
   );
 };
