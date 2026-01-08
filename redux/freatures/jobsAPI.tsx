@@ -13,6 +13,7 @@ export interface IJobProvider {
 }
 
 export interface IJobData {
+  id: number;
   job_title: string;
   selected_list: number;
   job_provider: IJobProvider;

@@ -44,9 +44,9 @@ const Jobs = () => {
     if (!data?.data) return [];
 
     return data.data
-      .map((job: IJobData, index: number) => ({
-        id: job.job_provider.company.id.toString(),
-        jobId: `#${index + 1}`,
+      .map((job: IJobData) => ({
+        id: job.id.toString(),
+        jobId: `${job.id}`,
         jobTitle: job.job_title,
         assigned: job.selected_list,
         company: job.job_provider.company.first_name,

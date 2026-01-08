@@ -19,7 +19,6 @@ const PayrollReports = () => {
     { key: "totalHours", label: "Total Hours", width: "100px" },
     { key: "totalPay", label: "Total Pay ($)", width: "100px" },
     { key: "status", label: "Status", width: "100px" },
-    { key: "action", label: "Action", width: "100px" },
   ];
   const renderCell = (item: IPayrollReports, columnKey: string) => {
     switch (columnKey) {
@@ -37,17 +36,7 @@ const PayrollReports = () => {
             {item?.status}
           </div>
         );
-      case "action":
-        return (
-          <div className="flex items-center">
-            <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors">
-              <CiCircleInfo className="size-6 text-gray-600" />
-            </button>
-            <Button className="p-0.5 bg-transparent hover:bg-gray-100 rounded-md transition-colors">
-              <AiOutlineDelete className="size-6 text-gray-600" />
-            </Button>
-          </div>
-        );
+
       default:
         return String(item[columnKey as keyof IPayrollReports]);
     }
