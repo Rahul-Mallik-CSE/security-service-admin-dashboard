@@ -1,17 +1,65 @@
 /** @format */
 
+"use client";
 import BackButton from "@/components/SharedComponents/BackButton";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useGetContractDetailsQuery } from "@/redux/freatures/contactListAPI";
+import Image from "next/image";
 
 const ContactListInfo = () => {
+  const params = useParams();
+  const contractId = Number(params.id);
+
+  const { data, isLoading, error } = useGetContractDetailsQuery(contractId);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Loading contract details...</div>
+      </div>
+    );
+  }
+
+  if (error || !data?.engagements) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg text-red-500">
+          Error loading contract details. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  const engagement = data.engagements;
+  const jobDetails = engagement.job_details;
+  const company = jobDetails.job_provider;
+  const operative = engagement.application.candidate;
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div>
       <div className="flex gap-3">
-        <BackButton></BackButton>
-        <h3 className="text-2xl font-medium text-heading">
-          Company Management
-        </h3>
+        <BackButton />
+        <h3 className="text-2xl font-medium text-heading">Contract Details</h3>
       </div>
       <main className="min-h-screen bg-background p-2.5">
         <div className="w-full rounded-xl border border-border bg-card p-4 space-y-3">
@@ -47,6 +95,7 @@ const ContactListInfo = () => {
                 Parties
               </h2>
 
+              {/* Party A - Employer */}
               <div className="mb-5">
                 <h3 className="mb-2 text-lg font-semibold text-bg-primary">
                   Party A — Employer
@@ -54,37 +103,63 @@ const ContactListInfo = () => {
                 <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
                   <DetailRow
                     label="Legal Name :"
-                    value="Apex Security Solutions Pty Ltd"
+                    value={company.company_name}
                   />
-                  <DetailRow label="ABN :" value="12 345 678 910" />
-                  <DetailRow label="Company License No. :" value="SA-482937" />
+                  <DetailRow
+                    label="ABN :"
+                    value={company.abn_number?.toString() || "N/A"}
+                  />
+                  <DetailRow
+                    label="Company License No. :"
+                    value={
+                      company.company.licences[0]?.licence_no || "N/A"
+                    }
+                  />
                   <DetailRow
                     label="State License Held :"
-                    value="New South Wales"
+                    value={
+                      company.company.licences[0]?.state_or_territory || "N/A"
+                    }
                   />
-                  <DetailRow label="Contact Email :" value="name@gmail.com" />
+                  <DetailRow
+                    label="Contact Email :"
+                    value={company.company.email}
+                  />
                 </div>
               </div>
 
+              {/* Party B - Worker */}
               <div>
                 <h3 className="mb-2 text-lg font-semibold text-bg-primary">
-                  Party A — Employer
+                  Party B — Worker
                 </h3>
                 <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-                  <DetailRow label="Full Name :" value="Michael Ross" />
+                  <DetailRow label="Full Name :" value={operative.first_name} />
                   <DetailRow
                     label="Security Licence No. :"
-                    value="QLD-SEC-239817"
+                    value={operative.licences[0]?.licence_no || "N/A"}
                   />
-                  <DetailRow label="Contact Phone :" value="+61 400 123 456" />
-                  <DetailRow label="Contact Email :" value="23 Sep, 2025" />
-                  <DetailRow label="Bank Name :" value="Trust Bank" />
-                  <DetailRow label="Account Name :" value="232651264" />
+                  <DetailRow
+                    label="Contact Phone :"
+                    value={operative.phone || "N/A"}
+                  />
+                  <DetailRow label="Contact Email :" value={operative.email} />
+                  <DetailRow
+                    label="Bank Name :"
+                    value={operative.bank_name || "N/A"}
+                  />
+                  <DetailRow
+                    label="Account Name :"
+                    value={operative.account_holder_name || "N/A"}
+                  />
                   <DetailRow
                     label="Bank-State-Branch (BSB) :"
-                    value="062-987"
+                    value={operative.bank_branch || "N/A"}
                   />
-                  <DetailRow label="Account Number :" value="98765432" />
+                  <DetailRow
+                    label="Account Number :"
+                    value={operative.account_no || "N/A"}
+                  />
                 </div>
               </div>
             </section>
@@ -96,45 +171,57 @@ const ContactListInfo = () => {
                   Engagement Details
                 </h2>
                 <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-                  <DetailRow label="Engagement Type :" value="Casual" />
-                  <DetailRow label="Role Type :" value="Crowd Controlle" />
+                  <DetailRow
+                    label="Engagement Type :"
+                    value={jobDetails.engagement_type}
+                  />
+                  <DetailRow label="Role Type :" value={jobDetails.job_title} />
                   <DetailRow
                     label="Site Name :"
-                    value="Event Centre Downtown"
+                    value={jobDetails.job_title}
                   />
                   <DetailRow
                     label="Location Address :"
-                    value="35 Park Ave, Sydney NSW 2000"
+                    value={jobDetails.address}
                   />
                   <DetailRow
                     label="Client Name :"
-                    value="EventCo Group Pty Ltd"
+                    value={company.company_name}
                   />
-                  <DetailRow label="Start Time :" value="18:00" />
-                  <DetailRow label="End Time :" value="23:00" />
-                  <DetailRow label="Duration (hours) :" value="8 hours" />
+                  <DetailRow
+                    label="Job Date :"
+                    value={formatDate(jobDetails.job_date)}
+                  />
+                  <DetailRow
+                    label="Start Time :"
+                    value={jobDetails.start_time}
+                  />
+                  <DetailRow label="End Time :" value={jobDetails.end_time} />
+                  <DetailRow
+                    label="Duration (hours) :"
+                    value={`${jobDetails.job_duration} hours`}
+                  />
                 </div>
               </div>
+              
+              {/* Remuneration */}
               <div className="mb-12 pb-8 mt-5 w-full">
                 <h2 className="mb-2 text-2xl font-bold text-foreground">
                   Remuneration
                 </h2>
-                <div>
-                  <div className="rounded-lg border border-border bg-muted/30 p-4">
-                    <DetailRow
-                      label="Base Hourly Rate (AUD) :"
-                      value="Negotiate"
-                    />
-                    <DetailRow
-                      label="Superannuation (% of Hourly Rate) :"
-                      value="11%"
-                    />
-                    <DetailRow
-                      label="Gross Hourly Total (AUD) :"
-                      value="$200"
-                    />
-                    <DetailRow label="Currency :" value="AUD" />
-                  </div>
+                <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+                  <DetailRow
+                    label="Pay Type :"
+                    value={jobDetails.pay_type}
+                  />
+                  <DetailRow
+                    label="Pay Rate :"
+                    value={`$${jobDetails.pay_rate} ${engagement.application.currency.toUpperCase()}`}
+                  />
+                  <DetailRow
+                    label="Total Amount :"
+                    value={`$${engagement.total_amount} ${engagement.application.currency.toUpperCase()}`}
+                  />
                 </div>
               </div>
             </section>
@@ -196,45 +283,71 @@ const ContactListInfo = () => {
                   Party A — Employer
                 </h3>
                 <div className="rounded-lg border border-border bg-muted/30 p-4">
-                  <DetailRow label="Full Name :" value="Michael Ross" />
-                  <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                    <span className="text-sm text-muted-foreground">
-                      Signature Status :
-                    </span>
-                    <span className="font-semibold text-yellow-600">
-                      Pending
-                    </span>
-                  </div>
+                  <DetailRow
+                    label="Full Name :"
+                    value={company.company_name}
+                  />
                   <DetailRow
                     label="Signature Timestamp :"
-                    value="14 Oct 2025, 18.03"
+                    value={
+                      engagement.signature_party_a
+                        ? formatDateTime(engagement.created_at)
+                        : "Not signed"
+                    }
                   />
                 </div>
                 <div className="flex justify-center">
-                  <div className="w-[290px] h-[57px] border border-dotted border-gray-300 rounded-lg"></div>
+                  {engagement.signature_party_a ? (
+                    <div className="relative w-48 h-24 border border-gray-300 rounded">
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${engagement.signature_party_a}`}
+                        alt="Party A Signature"
+                        fill
+                        className="object-contain p-2"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-48 h-24 border border-gray-300 rounded flex items-center justify-center text-gray-400">
+                      No Signature
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Party B */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-foreground">
-                  Party B — worker
+                  Party B — Worker
                 </h3>
                 <div className="rounded-lg border border-border bg-muted/30 p-4">
-                  <DetailRow label="Full Name :" value="Michael Ross" />
-                  <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                    <span className="text-sm text-muted-foreground">
-                      Signature Status :
-                    </span>
-                    <span className="font-semibold text-green-600">Signed</span>
-                  </div>
+                  <DetailRow
+                    label="Full Name :"
+                    value={operative.first_name}
+                  />
                   <DetailRow
                     label="Signature Timestamp :"
-                    value="14 Oct 2025, 18.03"
+                    value={
+                      engagement.signature_party_b
+                        ? formatDateTime(engagement.created_at)
+                        : "Not signed"
+                    }
                   />
                 </div>
                 <div className="flex justify-center">
-                  <div className="w-[290px] h-[57px] border border-dotted border-gray-300 rounded-lg"></div>
+                  {engagement.signature_party_b ? (
+                    <div className="relative w-48 h-24 border border-gray-300 rounded">
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${engagement.signature_party_b}`}
+                        alt="Party B Signature"
+                        fill
+                        className="object-contain p-2"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-48 h-24 border border-gray-300 rounded flex items-center justify-center text-gray-400">
+                      No Signature
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
