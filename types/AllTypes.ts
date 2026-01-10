@@ -350,3 +350,60 @@ export interface IOperativeManagementAPIResponse {
   message: string;
   data: IOperativeManagementData[];
 }
+
+// User Profile Types
+export interface IUserLicenceImage {
+  file: string;
+}
+
+export interface IUserLicence {
+  id: number;
+  licence_type: number;
+  licence_no: string;
+  licence_images: IUserLicenceImage[];
+  state_or_territory: string;
+  expire_date: string;
+}
+
+export interface IUserAccreditation {
+  id: number;
+  accreditation: string;
+  expire_date: string;
+  created_at: string;
+  updated_at: string;
+  accreditation_type: number;
+}
+
+export interface IUserProfile {
+  id: number;
+  email: string;
+  first_name: string;
+  phone: string | null;
+  is_email_varified: boolean;
+  image: string | null;
+  user_type: string;
+  gender: string;
+  language: string | null;
+  exprience_in_years: number;
+  exprience_summary: string;
+  address: string;
+  user_redus: number;
+  bank_name: string | null;
+  account_holder_name: string | null;
+  account_no: string | null;
+  bank_branch: string | null;
+  accreditations: IUserAccreditation[];
+  licences: IUserLicence[];
+  tax_file_number: string | null;
+  fund_name: string | null;
+  fund_usi: string | null;
+  sup_member_no: string | null;
+  date_of_birth: string | null;
+  is_subscribe: boolean;
+}
+
+export interface IUserProfileAPIResponse {
+  success: boolean;
+  message: string;
+  data: IUserProfile;
+}
