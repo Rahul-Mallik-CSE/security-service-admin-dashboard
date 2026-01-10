@@ -1,7 +1,10 @@
 /** @format */
 
 import baseAPI from "../api/baseAPI";
-import { IUserProfileAPIResponse } from "@/types/AllTypes";
+import {
+  IUserProfileAPIResponse,
+  ISubscriptionPlansAPIResponse,
+} from "@/types/AllTypes";
 
 const settingAPI = baseAPI.injectEndpoints({
   endpoints: (builder) => ({
@@ -23,9 +26,35 @@ const settingAPI = baseAPI.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+
+    // Get subscription plans
+    getSubscriptionPlans: builder.query<ISubscriptionPlansAPIResponse, void>({
+      query: () => ({
+        url: "/api/admin/subs-plans/",
+        method: "GET",
+      }),
+      providesTags: ["Billing"],
+    }),
+
+    // Update subscription plan
+    updateSubscriptionPlan: builder.mutation<
+      any,
+      { id: number; data: { duraton_day: number; price: number } }
+    >({
+      query: ({ id, data }) => ({
+        url: `/api/admin/subs-plans/${id}/`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Billing"],
+    }),
   }),
 });
 
-export const { useGetUserProfileQuery, useUpdateUserProfileMutation } =
-  settingAPI;
+export const {
+  useGetUserProfileQuery,
+  useUpdateUserProfileMutation,
+  useGetSubscriptionPlansQuery,
+  useUpdateSubscriptionPlanMutation,
+} = settingAPI;
 export default settingAPI;

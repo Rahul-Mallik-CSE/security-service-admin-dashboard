@@ -291,9 +291,16 @@ export interface IReferralManage {
 
 export interface ISubscriptionPlan {
   id: number;
-  name: string;
-  pricePerMonth: number;
-  benefits: string[];
+  duraton_day: number;
+  price: string;
+  discriptions: string;
+  plan_for: string;
+}
+
+export interface ISubscriptionPlansAPIResponse {
+  success: boolean;
+  message: string;
+  data: ISubscriptionPlan[];
 }
 
 export interface ISubscriptionUser {
