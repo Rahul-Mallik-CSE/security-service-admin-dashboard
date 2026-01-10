@@ -16,13 +16,6 @@ const Subscription = () => {
           <BackButton></BackButton>
           <h2 className="text-2xl font-medium text-heading">Subscription</h2>
         </div>
-        <Link
-          href={`/settings/subscription/${8232}`}
-          className="text-[16px] font-medium flex items-center gap-2 cursor-pointer text-white bg-bg-primary rounded-2xl py-3 px-7"
-        >
-          <DiamondPlus />
-          <span>Add New Plan</span>
-        </Link>
       </div>
 
       {/* subscription  card */}

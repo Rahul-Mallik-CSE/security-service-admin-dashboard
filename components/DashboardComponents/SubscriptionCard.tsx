@@ -44,12 +44,6 @@ const SubscriptionCard = ({
         <button className="font-semibold text-[16px] w-full bg-bg-primary py-4 text-white cursor-pointer rounded-2xl">
           Edit
         </button>
-        <button
-          onClick={handleDeletePlan}
-          className="font-semibold text-[16px] w-full py-4 text-red-500 border border-red-500 cursor-pointer rounded-2xl"
-        >
-          Delete
-        </button>
       </div>
     </div>
   );
