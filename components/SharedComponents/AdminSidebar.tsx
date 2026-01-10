@@ -32,8 +32,14 @@ import logo from "../../../public/logo.svg";
 import { FaMoneyCheck, FaUsersRays } from "react-icons/fa6";
 import { VscVerified } from "react-icons/vsc";
 import { BsShieldLock } from "react-icons/bs";
-import { CircleDollarSign, FilePenLine, MapPinHouse } from "lucide-react";
+import {
+  CircleDollarSign,
+  FilePenLine,
+  LogOut,
+  MapPinHouse,
+} from "lucide-react";
 import { LiaUsersCogSolid } from "react-icons/lia";
+import { logout } from "@/services/authService";
 // import { logout } from "@/service/authService";
 export default function DashboardSidebar() {
   return <DashboardSidebarContent />;
@@ -49,8 +55,8 @@ function DashboardSidebarContent() {
   const handleLogout = async () => {
     // Perform logout actions here (clear tokens, etc.)
     // Redirect to login page
-    // await logout();
-    // localStorage.removeItem("accessToken");
+    await logout();
+    localStorage.removeItem("accessToken");
     router.push("/sign-in");
     setIsLogoutModalOpen(false);
   };
@@ -92,7 +98,7 @@ function DashboardSidebarContent() {
       label: "Referral Manage",
       icon: LiaUsersCogSolid,
     },
-    
+
     { href: "/settings", label: "Settings", icon: IoSettingsOutline },
   ];
 
@@ -146,6 +152,21 @@ function DashboardSidebarContent() {
             ))}
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter className="p-4 border-t mt-auto">
+          <button
+            onClick={() => setIsLogoutModalOpen(true)}
+            className={cn(
+              isCollapsed
+                ? "flex items-center justify-center w-full p-2 rounded-full hover:bg-red-100 transition-colors"
+                : "flex items-center gap-3 w-full p-2 rounded-md hover:bg-red-100 transition-colors"
+            )}
+          >
+            <LogOut size={isCollapsed ? 20 : 18} className="text-red-500" />
+            {!isCollapsed && (
+              <span className="text-sm font-medium text-red-500">Logout</span>
+            )}
+          </button>
+        </SidebarFooter>
       </Sidebar>
       <LogoutModal
         isOpen={isLogoutModalOpen}
