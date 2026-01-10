@@ -407,3 +407,17 @@ export interface IUserProfileAPIResponse {
   message: string;
   data: IUserProfile;
 }
+
+// Support Message Types
+export interface ISupportMessage {
+  id: number;
+  full_name: string;
+  email: string;
+  message: string;
+  created_at: string;
+}
+
+export interface ISupportMessagesAPIResponse {
+  success: boolean;
+  messages: ISupportMessage[];
+}
