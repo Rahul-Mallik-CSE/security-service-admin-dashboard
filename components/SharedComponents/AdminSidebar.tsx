@@ -37,6 +37,7 @@ import {
   FilePenLine,
   LogOut,
   MapPinHouse,
+  MessageCircleMore,
 } from "lucide-react";
 import { LiaUsersCogSolid } from "react-icons/lia";
 import { logout } from "@/services/authService";
@@ -97,6 +98,11 @@ function DashboardSidebarContent() {
       href: "/referral-manage",
       label: "Referral Manage",
       icon: LiaUsersCogSolid,
+    },
+    {
+      href: "/support",
+      label: "Support",
+      icon: MessageCircleMore,
     },
 
     { href: "/settings", label: "Settings", icon: IoSettingsOutline },
