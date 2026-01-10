@@ -92,6 +92,7 @@ function DashboardSidebarContent() {
       label: "Referral Manage",
       icon: LiaUsersCogSolid,
     },
+    
     { href: "/settings", label: "Settings", icon: IoSettingsOutline },
   ];
 
