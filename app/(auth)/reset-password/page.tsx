@@ -1,7 +1,7 @@
 /** @format */
 
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 import resetPasswordImage from "../../../public/auth/reset.png";
 import logo from "../../../public/logo.svg";
@@ -9,6 +9,8 @@ import BackButton from "@/components/SharedComponents/BackButton";
 import Image from "next/image";
 import FormHandler from "@/components/FormComponents/FormHandler";
 import FormInput from "@/components/FormComponents/FormInput";
+import { useResetPasswordMutation } from "@/redux/freatures/authAPI";
+import { useRouter } from "next/navigation";
 
 type TResetPasswordData = {
   password: string;
@@ -19,9 +21,45 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+  const [token, setToken] = useState("");
+  const router = useRouter();
 
-  const onsubmit = (data: TResetPasswordData) => {
-    console.log(data);
+  useEffect(() => {
+    const resetToken = localStorage.getItem("resetToken");
+    if (resetToken) {
+      setToken(resetToken);
+    } else {
+      router.push("/forgot-password");
+    }
+  }, [router]);
+
+  const onsubmit = async (data: TResetPasswordData) => {
+    try {
+      if (data.password !== data.confirmPassword) {
+        console.error("Passwords do not match");
+        return;
+      }
+
+      if (!token) {
+        console.error("Reset token is required");
+        return;
+      }
+
+      await resetPassword({
+        new_password: data.password,
+        token,
+      }).unwrap();
+
+      // Clear stored data
+      localStorage.removeItem("resetToken");
+      localStorage.removeItem("resetEmail");
+
+      // Navigate to login page
+      router.push("/login");
+    } catch (error) {
+      console.error("Error resetting password:", error);
+    }
   };
   return (
     <div className="flex justify-center items-center">
@@ -80,9 +118,10 @@ const ResetPassword = () => {
               </div>
               <button
                 type="submit"
-                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl cursor-pointer"
+                disabled={isLoading}
+                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl cursor-pointer disabled:opacity-50"
               >
-                Reset Password
+                {isLoading ? "Resetting..." : "Reset Password"}
               </button>
             </FormHandler>
           </div>

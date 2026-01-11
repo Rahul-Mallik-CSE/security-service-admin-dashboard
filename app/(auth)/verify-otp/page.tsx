@@ -7,13 +7,31 @@ import verifyOtpImage from "../../../public/auth/otp.png";
 import logo from "../../../public/logo.svg";
 import FormHandler from "@/components/FormComponents/FormHandler";
 import BackButton from "@/components/SharedComponents/BackButton";
-import { useRef, useState, ChangeEvent, KeyboardEvent } from "react";
+import { useRef, useState, ChangeEvent, KeyboardEvent, useEffect } from "react";
+import {
+  useVerifyForgetPasswordOtpMutation,
+  useForgetPasswordMutation,
+} from "@/redux/freatures/authAPI";
+import { useRouter } from "next/navigation";
 
 const VerifyOtp = () => {
   // Correct typing for multiple refs
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [verifyOtp, { isLoading }] = useVerifyForgetPasswordOtpMutation();
+  const [resendOtp] = useForgetPasswordMutation();
+  const [email, setEmail] = useState("");
+  const router = useRouter();
 
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
+
+  useEffect(() => {
+    const resetEmail = localStorage.getItem("resetEmail");
+    if (resetEmail) {
+      setEmail(resetEmail);
+    } else {
+      router.push("/forgot-password");
+    }
+  }, [router]);
 
   // -----------------------------------
   // Handle OTP input change
@@ -45,16 +63,41 @@ const VerifyOtp = () => {
   // -----------------------------------
   // Submit OTP
   // -----------------------------------
-  const onsubmit = () => {
-    const originalOtp = otp.join("");
-    console.log(originalOtp);
+  const onsubmit = async () => {
+    try {
+      const originalOtp = otp.join("");
+      if (!email) {
+        console.error("Email is required");
+        return;
+      }
+
+      const response = await verifyOtp({ email, otp: originalOtp }).unwrap();
+
+      // Store the token for reset password
+      localStorage.setItem("resetToken", response.access);
+
+      // Navigate to reset password page
+      router.push("/reset-password");
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+    }
   };
 
   // -----------------------------------
   // Resend OTP
   // -----------------------------------
-  const handleResendCode = () => {
-    console.log("resend code");
+  const handleResendCode = async () => {
+    try {
+      if (!email) {
+        console.error("Email is required");
+        return;
+      }
+
+      await resendOtp({ email }).unwrap();
+      console.log("OTP resent successfully");
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+    }
   };
 
   return (
@@ -104,9 +147,10 @@ const VerifyOtp = () => {
 
               <button
                 type="submit"
-                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl"
+                disabled={isLoading}
+                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl disabled:opacity-50"
               >
-                Verification
+                {isLoading ? "Verifying..." : "Verification"}
               </button>
             </FormHandler>
 

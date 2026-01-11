@@ -7,10 +7,25 @@ import Image from "next/image";
 import forgotPasswordImage from "../../../public/auth/forgot.png";
 import logo from "../../../public/logo.svg";
 import BackButton from "@/components/SharedComponents/BackButton";
+import { useForgetPasswordMutation } from "@/redux/freatures/authAPI";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const ForgotPassword = () => {
-  const onsubmit = (data: { email: string }) => {
-    console.log(data);
+  const [forgetPassword, { isLoading }] = useForgetPasswordMutation();
+  const [email, setEmail] = useState("");
+  const router = useRouter();
+
+  const onsubmit = async (data: { email: string }) => {
+    try {
+      setEmail(data.email);
+      await forgetPassword(data).unwrap();
+      // Navigate to OTP verification page and pass email via localStorage or query
+      localStorage.setItem("resetEmail", data.email);
+      router.push("/verify-otp");
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+    }
   };
   return (
     <div className="flex justify-center items-center">
@@ -46,9 +61,10 @@ const ForgotPassword = () => {
               ></FormInput>
               <button
                 type="submit"
-                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl cursor-pointer"
+                disabled={isLoading}
+                className="text-white font-bold text-lg bg-bg-primary w-full py-3 rounded-xl cursor-pointer disabled:opacity-50"
               >
-                Sent OTP
+                {isLoading ? "Sending..." : "Send OTP"}
               </button>
             </FormHandler>
           </div>

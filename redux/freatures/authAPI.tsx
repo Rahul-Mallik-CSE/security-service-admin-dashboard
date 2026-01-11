@@ -61,6 +61,39 @@ const authAPI = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth"],
     }),
+    forgetPassword: builder.mutation<any, { email: string }>({
+      query: (data) => ({
+        url: `/api/auth/forgetpassword/`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
+    verifyForgetPasswordOtp: builder.mutation<
+      any,
+      { email: string; otp: string }
+    >({
+      query: ({ email, otp }) => ({
+        url: `/api/auth/vefiry_for_forget/${email}/`,
+        method: "POST",
+        body: { otp },
+      }),
+      invalidatesTags: ["Auth"],
+    }),
+    resetPassword: builder.mutation<
+      any,
+      { new_password: string; token: string }
+    >({
+      query: ({ new_password, token }) => ({
+        url: `/api/auth/reset_password/`,
+        method: "POST",
+        body: { new_password },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
 });
 
@@ -71,4 +104,7 @@ export const {
   //   useForgetPasswordMutation,
   useLoginMutation,
   useChangePasswordMutation,
+  useForgetPasswordMutation,
+  useVerifyForgetPasswordOtpMutation,
+  useResetPasswordMutation,
 } = authAPI;
