@@ -61,6 +61,32 @@ const VerifyOtp = () => {
   };
 
   // -----------------------------------
+  // Handle paste
+  // -----------------------------------
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
+
+    // Only process if pasted data contains digits
+    const digits = pastedData.replace(/\D/g, "").slice(0, 6);
+
+    if (digits.length > 0) {
+      const newOtp = [...otp];
+
+      // Fill the OTP array with pasted digits
+      for (let i = 0; i < 6; i++) {
+        newOtp[i] = digits[i] || "";
+      }
+
+      setOtp(newOtp);
+
+      // Focus the next empty input or the last input
+      const nextEmptyIndex = digits.length < 6 ? digits.length : 5;
+      inputRefs.current[nextEmptyIndex]?.focus();
+    }
+  };
+
+  // -----------------------------------
   // Submit OTP
   // -----------------------------------
   const onsubmit = async () => {
@@ -139,8 +165,10 @@ const VerifyOtp = () => {
                     ref={(el) => {
                       inputRefs.current[i] = el;
                     }}
+                    value={otp[i]}
                     onChange={(e) => handleChange(i, e)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
+                    onPaste={handlePaste}
                   />
                 ))}
               </div>
