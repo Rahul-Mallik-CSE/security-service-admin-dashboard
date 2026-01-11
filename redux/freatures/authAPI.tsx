@@ -49,6 +49,7 @@ const authAPI = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Auth", "User"],
     }),
     changePassword: builder.mutation<
       any,
@@ -59,7 +60,7 @@ const authAPI = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Auth"],
+      invalidatesTags: ["Auth", "User"],
     }),
     forgetPassword: builder.mutation<any, { email: string }>({
       query: (data) => ({

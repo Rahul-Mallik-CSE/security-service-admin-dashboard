@@ -9,7 +9,15 @@ import { getFullImageFullUrl } from "@/lib/utils";
 
 const AdminHeader = () => {
   const pathname = usePathname();
-  const { data, isLoading } = useGetUserProfileQuery();
+  const { data, isLoading, refetch } = useGetUserProfileQuery();
+
+  // Refetch user profile if we have a token but no data
+  React.useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token && !data && !isLoading) {
+      refetch();
+    }
+  }, [data, isLoading, refetch]);
 
   if (
     pathname === "/forgot-password" ||

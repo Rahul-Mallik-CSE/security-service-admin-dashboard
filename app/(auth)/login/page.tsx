@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useLoginMutation } from "@/redux/freatures/authAPI";
 import { saveTokens } from "@/services/authService";
 import { toast } from "react-toastify";
+import { useGetUserProfileQuery } from "@/redux/freatures/settingAPI";
 
 type TLoginData = {
   email: string;
@@ -23,6 +24,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const router = useRouter();
   const [login, { isLoading }] = useLoginMutation();
+
+  // This will help trigger the user profile query after login
+  const { refetch: refetchUserProfile } = useGetUserProfileQuery();
 
   const onsubmit = async (data: TLoginData) => {
     try {
@@ -35,6 +39,9 @@ const Login = () => {
         // Save the access token to both cookies and localStorage
         await saveTokens(response.access);
         localStorage.setItem("accessToken", response.access);
+
+        // Trigger user profile refetch
+        refetchUserProfile();
 
         // Show success toast
         toast.success(response.message || "Login successful!");
