@@ -24,9 +24,18 @@ const referralManageAPI = baseAPI.injectEndpoints({
       }),
       providesTags: ["Referral"],
     }),
+    editReward: build.mutation<any, any>({
+      query: (body) => ({
+        url: "/api/admin/payment-controller/",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Referral"],
+    }),
   }),
 });
 
-export const { useGetReferralManageQuery } = referralManageAPI;
+export const { useGetReferralManageQuery, useEditRewardMutation } =
+  referralManageAPI;
 
 export default referralManageAPI;
