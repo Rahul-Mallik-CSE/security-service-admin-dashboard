@@ -94,16 +94,7 @@ const RefferalManage = () => {
           >
             <span>Edit Reward</span>
           </button>
-          <button
-            onClick={() =>
-              (
-                document.getElementById("my_modal_6") as HTMLDialogElement
-              ).showModal()
-            }
-            className="text-blue-800 bg-blue-300 rounded-xl py-1.5 px-4 font-medium flex items-center gap-2 text-[20px] cursor-pointer"
-          >
-            <span>View Reward</span>
-          </button>
+
           <EditRewardInfoModal></EditRewardInfoModal>
         </div>
       </div>

@@ -2,8 +2,12 @@
 
 "use client";
 import { useForm } from "react-hook-form";
-import { useEditRewardMutation } from "@/redux/freatures/referralManageAPI";
+import {
+  useEditRewardMutation,
+  useGetRewardSettingsQuery,
+} from "@/redux/freatures/referralManageAPI";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
 
 type TEditRewardData = {
   userRole: "company" | "user";
@@ -13,19 +17,55 @@ type TEditRewardData = {
 };
 
 const EditRewardInfoModal = () => {
-  const { register, watch, reset, handleSubmit } = useForm<TEditRewardData>({
-    defaultValues: {
-      userRole: "company",
-      rewardType: "days",
-      targetReferrals: "1",
-      rewardAmount: "",
-    },
-  });
+  const { register, watch, reset, handleSubmit, setValue } =
+    useForm<TEditRewardData>({
+      defaultValues: {
+        userRole: "company",
+        rewardType: "days",
+        targetReferrals: "1",
+        rewardAmount: "",
+      },
+    });
 
   const [editReward, { isLoading }] = useEditRewardMutation();
+  const { data: rewardData, isLoading: isLoadingReward } =
+    useGetRewardSettingsQuery();
 
   const userRole = watch("userRole");
   const rewardType = watch("rewardType");
+
+  // Update form values when userRole changes or data loads
+  useEffect(() => {
+    if (rewardData?.data) {
+      const data = rewardData.data;
+
+      if (userRole === "company") {
+        // Set company data
+        const isPercentage = data.is_percentage_company;
+        setValue("rewardType", isPercentage ? "percent" : "days");
+        setValue("targetReferrals", String(data.min_referral_user_of_company));
+        setValue(
+          "rewardAmount",
+          String(
+            isPercentage
+              ? data.percentage_company
+              : data.total_free_days_company
+          )
+        );
+      } else {
+        // Set guard (user) data
+        const isPercentage = data.is_percentage_guard;
+        setValue("rewardType", isPercentage ? "percent" : "days");
+        setValue("targetReferrals", String(data.min_referral_user_of_guard));
+        setValue(
+          "rewardAmount",
+          String(
+            isPercentage ? data.percentage_guard : data.total_free_days_guard
+          )
+        );
+      }
+    }
+  }, [userRole, rewardData, setValue]);
 
   const onSubmit = async (formData: TEditRewardData) => {
     try {
